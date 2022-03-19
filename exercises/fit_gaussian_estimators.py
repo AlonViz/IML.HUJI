@@ -34,7 +34,7 @@ def test_univariate_gaussian():
     fig_1.update_layout(
         title_text='Univariate Gaussian Estimator<br><sup> Error in'
                    ' expectancy as a function of sample size</sup>'
-        , title_x=0.5)
+        , title_x=0.5, title_font_size=25)
     fig_1.show()
 
     # Question 3: Plot the PDF using fitted model
@@ -47,7 +47,8 @@ def test_univariate_gaussian():
     fig_2.update_layout(title_text="Univariate Gaussian Estimator<br><sup>"
                                    " sample density plotted on empirical PDF</sup>",
                         xaxis_title="Sample Value",
-                        yaxis_title="Empirical PDF", title_x=0.5)
+                        yaxis_title="Empirical PDF", title_x=0.5,
+                        title_font_size=25)
     fig_2.update_traces(marker=dict(size=2))
     fig_2.show()
 
