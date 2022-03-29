@@ -7,6 +7,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
+import datetime
+
 pio.templates.default = "simple_white"
 
 
@@ -23,7 +25,36 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    raise NotImplementedError()
+
+    df = pd.read_csv(filename)
+
+    # Add features for years since the house exists and years since it was last renovated
+    df['date_formatted'] = pd.to_datetime(df['date'], format="%Y%m%dT%f", errors='coerce')
+    df['yr_sold'] = pd.DatetimeIndex(df['date_formatted']).year
+    df['yrs_since_built'] = df['yr_sold'] - df['yr_built']
+    df['yrs_since_renovated'] = pd.DataFrame([df['yr_sold'] - df['yr_renovated'], df['yrs_since_built']]).min(axis=1)
+    df['yrs_since_renovated'].fillna(df['yrs_since_built'], inplace=True)
+
+    # Add feature: has_basement
+    df['has_basement'] = df['sqft_basement']
+    df['has_basement'] = df['has_basement'].where(df['has_basement'] == 0, 1)
+
+    # Add features: average prices based on : month of sale
+    df['year_month'] = pd.to_datetime(df['date_formatted']).apply(
+        lambda x: '{year}-{month}'.format(year=x.year, month=x.month))
+    df['avg_price'] = df.groupby(['year_month'])['price'].transform('mean')
+
+    # Add features: categorical feature for each zipcde
+    df = pd.get_dummies(df, columns=['zipcode'], drop_first=True)
+
+    # Drop unneccessary features for linear regression (drop id or not?)
+    df.drop(inplace=True, columns=['id', 'date', 'lat', 'long', 'date_formatted', 'yr_sold', 'year_month'])
+
+    # Drop missing values and negatives. according to check made only a few missing values, simply drop the rows
+    df.dropna(inplace=True)
+    df = df[df.select_dtypes(include=[np.number]).ge(0).all(1)]
+
+    return df.drop(columns=['price']), df['price']
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
@@ -36,26 +67,32 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     ----------
     X : DataFrame of shape (n_samples, n_features)
         Design matrix of regression problem
-
     y : array-like of shape (n_samples, )
         Response vector to evaluate against
-
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    raise NotImplementedError()
+    stddev_y = np.std(y)
+    for column in X.columns:
+        pearson_cor = np.cov(X[column], y, bias=True)[0][1] / (stddev_y * np.std(X[column]))
+        labels = {'x': column, 'y': 'Price'}
+        fig = px.scatter(x=X[column], y=y, labels=labels,
+                         title="Response (price) as function of feature: {column_name}<br>"
+                               "<sup> Pearson correlation: {pearson}</sup>"
+                         .format(column_name=column, pearson=pearson_cor))
+        fig.update_layout(title_x=0.5, title_font_size=25)
+        fig.write_image("{folder}/pearson_{figure_name}.png".format(folder=output_path, figure_name=column))
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of housing prices dataset
-    raise NotImplementedError()
+    X, y = load_data("../datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    raise NotImplementedError()
+    feature_evaluation(X, y, '../plots')
 
     # Question 3 - Split samples into training- and testing sets.
-    raise NotImplementedError()
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -64,4 +101,4 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    raise NotImplementedError()
+    # raise NotImplementedError()
