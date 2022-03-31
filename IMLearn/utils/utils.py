@@ -34,9 +34,9 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
 
     """
     p = np.random.permutation(y.size)
-    X, y = X[p], y[p]
+    X, y = X.reindex(p), y.reindex(p)
     amount = int(np.ceil(train_proportion * y.size))
-    return X[:amount, :], y[:amount], X[amount:, :], y[amount:]
+    return X.iloc[:amount], y.iloc[:amount], X.iloc[amount:], y.iloc[amount:]
 
 
 def confusion_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
