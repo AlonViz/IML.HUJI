@@ -7,6 +7,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
+import sys
+
+sys.path.insert(1, '~/IML/IML.HUJI')
 
 pio.templates.default = "simple_white"
 
