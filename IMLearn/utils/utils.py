@@ -33,8 +33,11 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
         Responses of test samples
 
     """
-    p = np.random.permutation(y.size)
-    X, y = X.reindex(p), y.reindex(p)
+    # join X_y to shuffle them simultaneously and then seperate them again
+    X_y = X.join(y)
+    X_y = X_y.sample(frac=1).reset_index(drop=True)
+    X, y = X_y.iloc[:, :-1], X_y.iloc[:, -1:]
+
     amount = int(np.ceil(train_proportion * y.size))
     return X.iloc[:amount], y.iloc[:amount], X.iloc[amount:], y.iloc[amount:]
 
