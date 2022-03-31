@@ -4,6 +4,7 @@ from numpy.linalg import pinv
 from IMLearn.utils import utils
 import pandas as pd
 from IMLearn.learners.regressors import LinearRegression
+from IMLearn.learners.regressors import PolynomialFitting
 
 
 def _test(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
@@ -27,7 +28,12 @@ def _test(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
     self.coefs_ = pinv(X) @ y
 
 
-X = pd.DataFrame(np.array([[i for _ in range(5)] for i in range(20)]))
-y = pd.DataFrame(np.array([i for i in range(20)]))
-est = LinearRegression()
-print(est.fit(X.values, y.values).predict(X.values))
+X = np.array([[1, 10],
+              [2, 20],
+              [3, 30],
+              [4, 40]])
+
+estimator = PolynomialFitting(7)
+estimator.fit(X, np.array([5, 2, 3, 4]))
+print(estimator.predict(X))
+print(estimator.loss(X, np.array([5, 2, 3, 4])))

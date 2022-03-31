@@ -85,8 +85,10 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
 
 if __name__ == '__main__':
     np.random.seed(0)
+
     # Question 1 - Load and preprocessing of housing prices dataset
     X, y = load_data("../datasets/house_prices.csv")
+
     # Question 2 - Feature evaluation with respect to response
     # feature_evaluation(X, y, '../plots')
 
@@ -101,7 +103,7 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     estimator = LinearRegression()
-    iterations = 2
+    iterations = 10
     data = pd.DataFrame(columns=['percent', 'mean', 'std'])
 
     for percent in range(10, 101):
@@ -117,12 +119,18 @@ if __name__ == '__main__':
     data['lower_std'] = data['mean'] - 2 * data['std']
 
     # Plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
+    layout = go.Layout(title="House Price Prediction with Linear Regression<br><sup> "
+                             "MSE as a function of training set size</sup>",
+                       xaxis={'title': 'Percent of train set'},
+                       yaxis={'title': 'MSE over 10 iterations'})
+    title_layout = {'font_size': 25, 'x': 0.5}
     fig = go.Figure((
-        go.Scatter(data, x='percent', y='mean', mode="markers+lines", name="Mean Prediction", line=dict(dash="dash"),
-                   gmarker=dict(color="green", opacity=.7)),
-        go.Scatter(data, x='percent', y='lower_std', fill=None, mode="lines", line=dict(color="lightgrey"),
-                   showlegend=False),
-        go.Scatter(data, x='percent', y='upper_std', fill='tonexty', mode="lines",
+        go.Scatter(x=data['percent'], y=data['mean'], mode="lines", name="MSE",
+                   line=dict(dash="dash"), marker=dict(color="blue")),
+        go.Scatter(x=data['percent'], y=data['lower_std'], name="Confidence Interval", fill=None, mode="lines",
+                   line=dict(color="lightgrey")),
+        go.Scatter(x=data['percent'], y=data['upper_std'], name="Confidence Interval", fill='tonexty', mode="lines",
                    line=dict(color="lightgrey"),
-                   showlegend=False)))
+                   showlegend=False)), layout=layout)
+    fig.update_layout(title=title_layout)
     fig.show()
