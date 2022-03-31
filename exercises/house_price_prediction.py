@@ -73,7 +73,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     """
     stddev_y = np.std(y)
     for column in X.columns:
-        pearson_cor = np.cov(X[column], y, bias=True)[0][1] / (stddev_y * np.std(X[column])).__round__(3)
+        pearson_cor = (np.cov(X[column], y, bias=True)[0][1] / (stddev_y * np.std(X[column]))).__round__(3)
         labels = {'x': column, 'y': 'Price'}
         fig = px.scatter(x=X[column], y=y, labels=labels,
                          title="Response (price) as function of feature: {column_name}<br>"
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     X, y = load_data("../datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    feature_evaluation(X, y, '../plots')
+    feature_evaluation(X, y, '../Plots/Ex2')
 
     # Question 3 - Split samples into training- and testing sets.
     X_train, y_train, X_test, y_test = split_train_test(X, y)
