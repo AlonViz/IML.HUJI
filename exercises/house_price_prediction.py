@@ -73,13 +73,13 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     """
     stddev_y = np.std(y)
     for column in X.columns:
-        pearson_cor = np.cov(X[column], y, bias=True)[0][1] / (stddev_y * np.std(X[column]))
+        pearson_cor = np.cov(X[column], y, bias=True)[0][1] / (stddev_y * np.std(X[column])).__round__(3)
         labels = {'x': column, 'y': 'Price'}
         fig = px.scatter(x=X[column], y=y, labels=labels,
                          title="Response (price) as function of feature: {column_name}<br>"
                                "<sup> Pearson correlation: {pearson}</sup>"
                          .format(column_name=column, pearson=pearson_cor))
-        fig.update_layout(title_x=0.5, title_font_size=25)
+        fig.update_layout(title_x=0.5, title_font_size=25, width=800, height=500)
         fig.write_image("{folder}/pearson_{figure_name}.png".format(folder=output_path, figure_name=column))
 
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     X, y = load_data("../datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    # feature_evaluation(X, y, '../plots')
+    feature_evaluation(X, y, '../plots')
 
     # Question 3 - Split samples into training- and testing sets.
     X_train, y_train, X_test, y_test = split_train_test(X, y)
@@ -132,5 +132,5 @@ if __name__ == '__main__':
         go.Scatter(x=data['percent'], y=data['upper_std'], name="Confidence Interval", fill='tonexty', mode="lines",
                    line=dict(color="lightgrey"),
                    showlegend=False)), layout=layout)
-    fig.update_layout(title=title_layout)
+    fig.update_layout(title=title_layout, width=800, height=500)
     fig.show()
