@@ -7,7 +7,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
-import datetime
 
 pio.templates.default = "simple_white"
 
@@ -85,16 +84,35 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
 
 
 if __name__ == '__main__':
-    np.random.seed(0)
+    # np.random.seed(0)
     # Question 1 - Load and preprocessing of housing prices dataset
     X, y = load_data("../datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    feature_evaluation(X, y, '../plots')
+    # feature_evaluation(X, y, '../plots')
 
     # Question 3 - Split samples into training- and testing sets.
+    X_train, y_train, X_test, y_test = split_train_test(X, y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
+    estimator = LinearRegression()
+    losses = np.empty(0)
+    iterations = 10
+
+    for percent in range(1, 101):
+        mean_loss = 0
+        for _ in range(iterations):
+            X_y_train = X_train.join(y_train)
+            X_y_sample = X_y_train.sample(frac=percent / 100)
+            X_sample, y_sample = X_y_sample.iloc[:, :-1], X_y_sample.iloc[:, -1:]
+            estimator.fit(X_sample.values, y_sample.values)
+            mean_loss += estimator.loss(X_test.values, y_test.values)
+            print("percent: {percent}, iterations: {_}".format(percent=percent, _=_))
+
+        mean_loss /= iterations
+        np.append(losses, mean_loss)
+    print(losses)
+
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
     #   1) Sample p% of the overall training data
     #   2) Fit linear model (including intercept) over sampled set
