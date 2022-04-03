@@ -12,7 +12,7 @@ def proccess_labels(booking_datetime: pd.Series, labels: pd.Series) -> np.ndarra
     # print("Cancelled: {c}".format(c=np.count_nonzero(~np.isnan(cancel_duration))))
     cancel_duration = (cancel_duration / np.timedelta64(1, 'D')).to_numpy()
     cancel_duration = np.nan_to_num(cancel_duration, nan=-1)
-    cancel_duration = np.where((cancel_duration < 7) | (cancel_duration > 45) | (cancel_duration == -1), 0, 1)
+    cancel_duration = np.where((cancel_duration < 7) | (cancel_duration > 40) | (cancel_duration == -1), 0, 1)
     # print("Cancelled after 7 to 45 days: {0}".format(np.sum(cancel_duration)))
     return cancel_duration
 
@@ -118,7 +118,6 @@ def evaluate_and_export(estimator: BaseEstimator, X: pd.DataFrame, filename: str
 
     """
     output_df = pd.DataFrame(estimator.predict(X.to_numpy()), columns=["predicted_values"])
-    # print(output_df["predicted_values"].to_numpy().sum())
     output_df.to_csv(filename, index=False)
 
 
@@ -151,7 +150,5 @@ if __name__ == '__main__':
     # Load Test Data
     df_test = load_test_data(df.columns, "test_data/test_set_week_1.csv")
     # Store model predictions over test set
-    evaluate_and_export(estimator, df_test, "results/results_week_1.csv")
+    evaluate_and_export(estimator, df_test, "results/209789924_208731968_318592052.csv")
     # ids: 209789924_208731968_318592052
-
-    # TODO: Fix imports
