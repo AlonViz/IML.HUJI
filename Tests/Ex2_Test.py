@@ -5,6 +5,7 @@ from IMLearn.utils import utils
 import pandas as pd
 from IMLearn.learners.regressors import LinearRegression
 from IMLearn.learners.regressors import PolynomialFitting
+import IMLearn.metrics.loss_functions as lossfunctions
 
 
 def _test(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
@@ -33,7 +34,6 @@ X = np.array([[1, 10],
               [3, 30],
               [4, 40]])
 
-estimator = PolynomialFitting(7)
-estimator.fit(X, np.array([5, 2, 3, 4]))
-print(estimator.predict(X))
-print(estimator.loss(X, np.array([5, 2, 3, 4])))
+y_true = np.array([279000, 432000, 326000, 333000, 437400, 555950])
+y_pred = np.array([199000.37562541, 452589.25533196, 345267.48129011, 345856.57131275, 563867.1347574, 395102.94362135])
+print(lossfunctions.mean_square_error(y_true, y_pred).__round__(3))
