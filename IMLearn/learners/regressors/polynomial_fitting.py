@@ -37,8 +37,7 @@ class PolynomialFitting(LinearRegression):
 
         """X_powers: ndarray of shape(n_sample, n_features * k) where every feature is repeated k times for k powers.
         each row i of X_powers contains k copies of X[i], one for each power, in increasing order."""
-        X_powers = self.__transform(X)
-        super()._fit(X_powers, y)
+        super()._fit(self.__transform(X), y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -54,9 +53,7 @@ class PolynomialFitting(LinearRegression):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        X_powers = np.apply_along_axis(lambda col: np.vander(col, self._degree, increasing=True), axis=0, arr=X)
-        X_powers = X_powers.reshape(X_powers.shape[0], -1, order='F')
-        return super()._predict(X_powers)
+        return super()._predict(self.__transform(X))
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
