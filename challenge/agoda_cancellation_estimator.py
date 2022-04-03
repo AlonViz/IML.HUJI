@@ -2,6 +2,12 @@ from __future__ import annotations
 from typing import NoReturn
 from IMLearn.base import BaseEstimator
 import numpy as np
+from sklearn.metrics import accuracy_score
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 
 class AgodaCancellationEstimator(BaseEstimator):
@@ -9,7 +15,7 @@ class AgodaCancellationEstimator(BaseEstimator):
     An estimator for solving the Agoda Cancellation challenge
     """
 
-    def __init__(self) -> AgodaCancellationEstimator:
+    def __init__(self, EstimatorClass=DecisionTreeClassifier) -> AgodaCancellationEstimator:
         """
         Instantiate an estimator for solving the Agoda Cancellation challenge
 
@@ -22,6 +28,7 @@ class AgodaCancellationEstimator(BaseEstimator):
 
         """
         super().__init__()
+        self.model = EstimatorClass()
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -39,7 +46,7 @@ class AgodaCancellationEstimator(BaseEstimator):
         -----
 
         """
-        pass
+        self.model.fit(X, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -55,7 +62,7 @@ class AgodaCancellationEstimator(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return np.zeros(X.shape[0])
+        return np.array(self.model.predict(X).transpose())
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -74,4 +81,14 @@ class AgodaCancellationEstimator(BaseEstimator):
         loss : float
             Performance under loss function
         """
-        pass
+        raise NotImplementedError()
+
+    def accuracy(self, X: np.ndarray, y: np.ndarray):
+        """
+        print accuracy details of fitter model perfmoing on (X,y) test data.
+        param X: ndarray of shape (n_samples, n_features)
+        param y: ndarray of shape (n_samples, ). true labels of data
+        return: None. prints test results.
+        """
+        y_pred = self.model.predict(X)
+        return accuracy_score(y, y_pred)
