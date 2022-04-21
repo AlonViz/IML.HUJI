@@ -36,16 +36,28 @@ def run_perceptron():
     Create a line plot that shows the perceptron algorithm's training loss values (y-axis)
     as a function of the training iterations (x-axis).
     """
-    for n, f in [("Linearly Separable", "linearly_separable.npy"), ("Linearly Inseparable", "linearly_inseparable.npy")]:
+
+    def perceptron_callback(fit: Perceptron, x: np.ndarray, res: int):
+        """
+        callback function to be given to fitted perceptron.
+        fit is the Perceptron object being fitted, x the sample the perceptron was wrong on, y response.
+        """
+        losses.append(fit.loss(X, y))
+
+    for n, f in [("Linearly Separable", "../datasets/linearly_separable.npy"),
+                 ("Linearly Inseparable", "../datasets/linearly_inseparable.npy")]:
         # Load dataset
-        raise NotImplementedError()
+        dataset = np.load(f)
+        X, y = dataset[:, :-1], dataset[:, -1]
 
         # Fit Perceptron and record loss in each fit iteration
         losses = []
-        raise NotImplementedError()
+        perceptron = Perceptron(callback=perceptron_callback)
+        perceptron.fit(X, y)
+        print(losses)
 
         # Plot figure of loss as function of fitting iteration
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
 
 def get_ellipse(mu: np.ndarray, cov: np.ndarray):
@@ -103,4 +115,4 @@ def compare_gaussian_classifiers():
 if __name__ == '__main__':
     np.random.seed(0)
     run_perceptron()
-    compare_gaussian_classifiers()
+    # compare_gaussian_classifiers()
