@@ -86,7 +86,6 @@ class Perceptron(BaseEstimator):
                     self.coefs_ += y[i] * X[i, :]
                     self.callback_(self, X[i, :], y[i])
                     changed = True
-                    break
             if not changed:
                 return self.coefs_
         return self.coefs_
