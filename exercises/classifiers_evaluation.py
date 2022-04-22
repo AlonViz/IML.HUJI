@@ -108,18 +108,21 @@ def compare_gaussian_classifiers():
             model.fit(X, y)
             classes = model.predict(X)
 
-            # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
-            # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
+            # Plot a figure with two subplots, showing the Gaussian Naive Bayes
+            # predictions on the left and LDA predictions
+            # on the right. Plot title should specify dataset used and subplot titles
+            # should specify algorithm and accuracy
             # Create subplots
             from IMLearn.metrics import accuracy
             fig = px.scatter(X, color=classes, symbol=y)
-            fig.update_layout(title_text=f"Fitting Perceptron With Data:<br><sup>"
-                                         "Misclassification error during algorithm iterations</sup>",
-                              xaxis_title="Iteration",
-                              yaxis_title="Loss", title_x=0.5,
+            fig.update_layout(title_text=f"Fitting {classifier.__name__} on {n}: <br><sup>"
+                                         "Classified classes compared to actual</sup>",
+                              xaxis_title="Feature 1",
+                              yaxis_title="Feature 2", title_x=0.5,
                               title_font_size=25,
                               height=500,
                               width=800)
+            fig.show()
 
             # Add traces for data-points setting symbols and colors
             # raise NotImplementedError()

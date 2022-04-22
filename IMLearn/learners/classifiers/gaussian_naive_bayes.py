@@ -1,7 +1,7 @@
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
-from ...learners import MultivariateGaussian
+
 
 class GaussianNaiveBayes(BaseEstimator):
     """
@@ -46,7 +46,7 @@ class GaussianNaiveBayes(BaseEstimator):
         # A[i][j] == 1 iff classes_[i] == y[j]. A: (n_classes, n_samples)
         self.mu_ = (A @ X) / nk[:, None]
         self.pi_ = nk / y.size
-        self.vars_ = np.stack([np.var(X[y == class_, :], ddof=1, axis=0) for class_ in self.classes_])
+        self.vars_ = np.stack([np.var(X[y == class_, :], ddof=0, axis=0) for class_ in self.classes_])
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -82,9 +82,9 @@ class GaussianNaiveBayes(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        A = self.vars_ @ np.transpose(self.mu_)  # A : (n_features, n_classes)
-        B = np.log(self.pi_) - 0.5 * np.sum(self.mu_.dot(self._cov_inv) * self.mu_)  # B : (n_classes, )
-        return X @ A + B
+        A = (1 / self.vars_) * self.mu_
+        B = np.log(self.pi_) - 0.5 * np.sum(np.square(self.mu_) * (1 / self.vars_), axis=1)
+        return X @ np.transpose(A) + B
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

@@ -4,7 +4,7 @@ from typing import NoReturn
 import sklearn.discriminant_analysis
 from numpy.linalg import pinv
 
-from IMLearn.learners.classifiers import LDA
+from IMLearn.learners.classifiers import LDA, GaussianNaiveBayes
 from IMLearn.metrics import misclassification_error, accuracy
 from sklearn import naive_bayes, discriminant_analysis
 import plotly.express as px
@@ -16,20 +16,10 @@ for f in ["../datasets/gaussian1.npy", "../datasets/gaussian2.npy"]:
     X, y = dataset[:, :-1], dataset[:, -1]
 
     # Fit models and predict over training set
-    real = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(store_covariance=True)
+    real = sklearn.naive_bayes.GaussianNB()
     real.fit(X, y)
-    lda = LDA()
-    lda.fit(X, y)
+    gnb = GaussianNaiveBayes()
+    gnb.fit(X, y)
 
-    print(real.priors)
-    print(lda.pi_)
-    print()
-    print(real.means_)
-    print(lda.mu_)
-    print()
-    print(real.classes_)
-    print(lda.classes_)
-    print()
-    print(real.covariance_)
-    print(lda.cov_)
-    print()
+    # print(gnb.loss(X, y))
+    # print(misclassification_error(real.predict(X), y))
