@@ -97,12 +97,26 @@ def compare_gaussian_classifiers():
     """
     Fit both Gaussian Naive Bayes and LDA classifiers on both gaussians1 and gaussians2 datasets
     """
-    for f in ["gaussian1.npy", "gaussian2.npy"]:
+    for f in ["../datasets/gaussian1.npy", "../datasets/gaussian2.npy"]:
         # Load dataset
-        # raise NotImplementedError()
+        dataset = np.load(f)
+        X, y = dataset[:, :-1], dataset[:, -1]
 
         # Fit models and predict over training set
-        # raise NotImplementedError()
+        lda = GaussianNaiveBayes()
+        lda.fit(X, y)
+        classes = lda.predict(X)
+        print(lda.loss(X, y))
+
+        fig = px.scatter(X, color=classes, symbol=y)
+        fig.update_layout(title_text=f"Fitting Perceptron With Data:<br><sup>"
+                                     "Misclassification error during algorithm iterations</sup>",
+                          xaxis_title="Iteration",
+                          yaxis_title="Loss", title_x=0.5,
+                          title_font_size=25,
+                          height=500,
+                          width=800)
+        #fig.show()
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
@@ -122,5 +136,5 @@ def compare_gaussian_classifiers():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    run_perceptron()
+    # run_perceptron()
     compare_gaussian_classifiers()

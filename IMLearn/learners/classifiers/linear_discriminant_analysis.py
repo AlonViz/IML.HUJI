@@ -24,6 +24,7 @@ class LDA(BaseEstimator):
 
     self.pi_: np.ndarray of shape (n_classes)
         The estimated class probabilities. To be set in `GaussianNaiveBayes.fit`
+
     """
 
     def __init__(self):
@@ -48,9 +49,12 @@ class LDA(BaseEstimator):
             Responses of input data to fit to
         """
         self.classes_, nk = np.unique(y, return_counts=True)
-        self.mu_ = np.stack([np.where(y == class_, 1, 0) for class_ in self.classes_]) @ X
+        A = np.stack([np.where(y == class_, 1, 0) for class_ in self.classes_])
+        # A[i][j] == 1 iff classes_[i] == y[j]. A: (n_classes, n_samples)
+        self.mu_ = (A @ X) / nk[:, None]
         self.pi_ = nk / y.size
-        self.cov_ = (np.transpose(X - self.mu_) @ X - self.mu_) / y.size
+        X_mu = X - (np.transpose(A) @ self.mu_)  # reduce row mu_yi from X for each row x
+        self.cov_ = (np.transpose(X_mu) @ X_mu) / y.size
         self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -67,7 +71,7 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return np.max(self.likelihood(X))
+        return np.take(self.classes_, (np.argmax(self.likelihood(X), axis=1)))
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -88,9 +92,8 @@ class LDA(BaseEstimator):
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
         A = self._cov_inv @ np.transpose(self.mu_)  # A : (n_features, n_classes)
-        X_mu = X - self.mu_
-        B = np.log(self.pi_) - 0.5 * np.sum(X_mu.dot(self._cov_inv) * X_mu)  # B : (n_classes, )
-        return X@A + B
+        B = np.log(self.pi_) - 0.5 * np.sum(self.mu_.dot(self._cov_inv) * self.mu_)  # B : (n_classes, )
+        return X @ A + B
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
