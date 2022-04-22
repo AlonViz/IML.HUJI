@@ -62,7 +62,9 @@ def run_perceptron():
                                      "Misclassification error during algorithm iterations</sup>",
                           xaxis_title="Iteration",
                           yaxis_title="Loss", title_x=0.5,
-                          title_font_size=25)
+                          title_font_size=25,
+                          height=500,
+                          width=800)
         fig.show()
 
 
