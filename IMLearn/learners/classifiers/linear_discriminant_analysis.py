@@ -49,8 +49,7 @@ class LDA(BaseEstimator):
             Responses of input data to fit to
         """
         self.classes_, nk = np.unique(y, return_counts=True)
-        A = np.stack([np.where(y == class_, 1, 0) for class_ in self.classes_])
-        # A[i][j] == 1 iff classes_[i] == y[j]. A: (n_classes, n_samples)
+        A = np.stack([np.where(y == class_, 1, 0) for class_ in self.classes_])  # A[i][j] == 1 iff classes_[i] == y[j]
         self.mu_ = (A @ X) / nk[:, None]
         self.pi_ = nk / y.size
         X_mu = X - (np.transpose(A) @ self.mu_)  # reduce row mu_yi from X for each row x
@@ -92,7 +91,7 @@ class LDA(BaseEstimator):
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
         A = self._cov_inv @ np.transpose(self.mu_)  # A : (n_features, n_classes)
-        B = np.log(self.pi_) - 0.5 * np.sum(self.mu_.dot(self._cov_inv) * self.mu_)  # B : (n_classes, )
+        B = np.log(self.pi_) - 0.5 * np.sum((self.mu_.dot(self._cov_inv) * self.mu_), axis=1)  # B : (n_classes, )
         return X @ A + B
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:

@@ -97,41 +97,38 @@ def compare_gaussian_classifiers():
     """
     Fit both Gaussian Naive Bayes and LDA classifiers on both gaussians1 and gaussians2 datasets
     """
-    for f in ["../datasets/gaussian1.npy", "../datasets/gaussian2.npy"]:
-        # Load dataset
-        dataset = np.load(f)
-        X, y = dataset[:, :-1], dataset[:, -1]
+    for n, f in [("Gaussian 1", "../datasets/gaussian1.npy"), ("Gaussian 2", "../datasets/gaussian2.npy")]:
+        for classifier in LDA, GaussianNaiveBayes:
+            # Load dataset
+            dataset = np.load(f)
+            X, y = dataset[:, :-1], dataset[:, -1]
 
-        # Fit models and predict over training set
-        lda = GaussianNaiveBayes()
-        lda.fit(X, y)
-        classes = lda.predict(X)
-        print(lda.loss(X, y))
+            # Fit models and predict over training set
+            model = classifier()
+            model.fit(X, y)
+            classes = model.predict(X)
 
-        fig = px.scatter(X, color=classes, symbol=y)
-        fig.update_layout(title_text=f"Fitting Perceptron With Data:<br><sup>"
-                                     "Misclassification error during algorithm iterations</sup>",
-                          xaxis_title="Iteration",
-                          yaxis_title="Loss", title_x=0.5,
-                          title_font_size=25,
-                          height=500,
-                          width=800)
-        #fig.show()
+            # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
+            # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
+            # Create subplots
+            from IMLearn.metrics import accuracy
+            fig = px.scatter(X, color=classes, symbol=y)
+            fig.update_layout(title_text=f"Fitting Perceptron With Data:<br><sup>"
+                                         "Misclassification error during algorithm iterations</sup>",
+                              xaxis_title="Iteration",
+                              yaxis_title="Loss", title_x=0.5,
+                              title_font_size=25,
+                              height=500,
+                              width=800)
 
-        # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
-        # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
-        # Create subplots
-        from IMLearn.metrics import accuracy
-        # raise NotImplementedError()
+            # Add traces for data-points setting symbols and colors
+            # raise NotImplementedError()
 
-        # Add traces for data-points setting symbols and colors
-        # raise NotImplementedError()
+            # Add `X` dots specifying fitted Gaussians' means
+            # raise NotImplementedError()
 
-        # Add `X` dots specifying fitted Gaussians' means
-        # raise NotImplementedError()
-
-        # Add ellipses depicting the covariances of the fitted Gaussians
-        # raise NotImplementedError()
+            # Add ellipses depicting the covariances of the fitted Gaussians
+            # raise NotImplementedError()
 
 
 if __name__ == '__main__':
