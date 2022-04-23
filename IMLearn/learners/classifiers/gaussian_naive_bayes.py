@@ -1,6 +1,7 @@
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
+from numpy.linalg import slogdet
 
 
 class GaussianNaiveBayes(BaseEstimator):
@@ -84,7 +85,8 @@ class GaussianNaiveBayes(BaseEstimator):
 
         A = (1 / self.vars_) * self.mu_
         B = np.log(self.pi_) - 0.5 * np.sum(np.square(self.mu_) * (1 / self.vars_), axis=1)
-        return X @ np.transpose(A) + B
+        G = np.log(np.abs(np.prod(self.vars_, axis=1)))
+        return X @ np.transpose(A) + B[:, ] - 0.5 * (np.square(X) @ np.transpose((1 / self.vars_))) - 0.5 * G
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

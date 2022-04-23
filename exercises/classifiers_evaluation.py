@@ -1,6 +1,9 @@
 import numpy as np
+import pandas as pd
 from IMLearn.learners.classifiers import Perceptron, LDA, GaussianNaiveBayes
 from typing import Tuple
+
+from IMLearn.metrics import misclassification_error
 from utils import *
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -97,41 +100,45 @@ def compare_gaussian_classifiers():
     """
     Fit both Gaussian Naive Bayes and LDA classifiers on both gaussians1 and gaussians2 datasets
     """
-    for n, f in [("Gaussian 1", "../datasets/gaussian1.npy"), ("Gaussian 2", "../datasets/gaussian2.npy")]:
-        for classifier in LDA, GaussianNaiveBayes:
+    for n, f in [("gaussian-1", "../datasets/gaussian1.npy"), ("gaussian-2", "../datasets/gaussian2.npy")]:
+        fig = make_subplots(rows=1, cols=2, subplot_titles=["LDA", "Naive Bayes"])
+        for name, i, classifier in ("LDA", 0, LDA), ("Naive Bayes", 1, GaussianNaiveBayes):
             # Load dataset
             dataset = np.load(f)
             X, y = dataset[:, :-1], dataset[:, -1]
-
             # Fit models and predict over training set
             model = classifier()
             model.fit(X, y)
             classes = model.predict(X)
-
             # Plot a figure with two subplots, showing the Gaussian Naive Bayes
             # predictions on the left and LDA predictions
             # on the right. Plot title should specify dataset used and subplot titles
             # should specify algorithm and accuracy
             # Create subplots
             from IMLearn.metrics import accuracy
-            fig = px.scatter(X, color=classes, symbol=y)
-            fig.update_layout(title_text=f"Fitting {classifier.__name__} on {n}: <br><sup>"
-                                         "Classified classes compared to actual</sup>",
-                              xaxis_title="Feature 1",
-                              yaxis_title="Feature 2", title_x=0.5,
-                              title_font_size=25,
-                              height=500,
-                              width=800)
-            fig.show()
+            df = pd.DataFrame(np.column_stack((X, y, classes)),
+                              columns=["Feature 1", "Feature 2", "class", "prediction"])
+            subfig = go.Scatter(x=df["Feature 1"], y=df["Feature 2"], marker_color=df["prediction"],
+                                marker_symbol=df["class"], mode="markers")
+            fig.add_trace(subfig, row=1, col=i+1)
+            fig.layout.annotations[i].update(text=f"{name}: accuracy {misclassification_error(y, classes).__round__(2)}")
 
             # Add traces for data-points setting symbols and colors
             # raise NotImplementedError()
-
             # Add `X` dots specifying fitted Gaussians' means
             # raise NotImplementedError()
-
             # Add ellipses depicting the covariances of the fitted Gaussians
             # raise NotImplementedError()
+
+        fig.update_layout(
+            title_text=f"Classification: Performance of different classifiers on {n} data",
+            xaxis_title="Feature 1",
+            yaxis_title="Feature 2", title_x=0.5,
+            title_font_size=25,
+            height=600,
+            width=1000,
+            showlegend=True)
+        fig.show()
 
 
 if __name__ == '__main__':

@@ -21,5 +21,6 @@ for f in ["../datasets/gaussian1.npy", "../datasets/gaussian2.npy"]:
     gnb = GaussianNaiveBayes()
     gnb.fit(X, y)
 
-    # print(gnb.loss(X, y))
-    # print(misclassification_error(real.predict(X), y))
+    print(gnb.loss(X, y))
+    print(misclassification_error(real.predict(X), y))
+    print()
