@@ -27,18 +27,30 @@ def gaussians_non_linear():
 
 
 if __name__ == "__main__":
-    X, y = gaussians_non_linear()
-    lda, gnb = LDA(), GaussianNaiveBayes()
-    lda2 = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(store_covariance=True)
-    lda.fit(X, y)
-    lda2.fit(X, y)
+    # X, y = gaussians_non_linear()
+    # lda, gnb = LDA(), GaussianNaiveBayes()
+    # lda2 = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(store_covariance=True)
+    # lda.fit(X, y)
+    # lda2.fit(X, y)
+    # gnb.fit(X, y)
+    # df = pd.DataFrame(np.column_stack((X, y, lda.predict(X))),
+    #                  columns=["Feature 1", "Feature 2", "class", "prediction"])
+    # fig = go.Figure()
+    # fig.add_trace(go.Scatter(x=df["Feature 1"], y=df["Feature 2"], mode="markers", showlegend=False,
+    #                         marker=dict(color=df["prediction"], symbol=df["class"],
+    #                                     colorscale=custom[0:3],
+    #                                     line=dict(color="black", width=1))))
+    # fig.show()
+
+    X = np.array([[1, 1], [1, 2], [2, 3], [2, 4], [3, 3], [3, 4]])
+    y = np.array([0, 0, 1, 1, 1, 1])
+
+    gnb = GaussianNaiveBayes()
+
+    print(X.shape)
+    print(y.shape)
     gnb.fit(X, y)
 
-    df = pd.DataFrame(np.column_stack((X, y, lda.predict(X))),
-                      columns=["Feature 1", "Feature 2", "class", "prediction"])
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["Feature 1"], y=df["Feature 2"], mode="markers", showlegend=False,
-                             marker=dict(color=df["prediction"], symbol=df["class"],
-                                         colorscale=custom[0:3],
-                                         line=dict(color="black", width=1))))
-    # fig.show()
+    print(gnb.pi_)
+    print(gnb.mu_)
+    print(gnb.vars_)
