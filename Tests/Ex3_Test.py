@@ -1,26 +1,20 @@
 import numpy as np
-from typing import NoReturn
-
-import sklearn.discriminant_analysis
-from numpy.linalg import pinv
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from IMLearn.learners.classifiers import LDA, GaussianNaiveBayes
-from IMLearn.metrics import misclassification_error, accuracy
-from sklearn import naive_bayes, discriminant_analysis
-import plotly.express as px
-from IMLearn.metrics import misclassification_error
+from IMLearn.metrics import accuracy
+from utils import custom
 
-for f in ["../datasets/gaussian1.npy", "../datasets/gaussian2.npy"]:
-    # Load dataset
-    dataset = np.load(f)
-    X, y = dataset[:, :-1], dataset[:, -1]
 
-    # Fit models and predict over training set
-    real = sklearn.naive_bayes.GaussianNB()
-    real.fit(X, y)
-    gnb = GaussianNaiveBayes()
-    gnb.fit(X, y)
+def gaussians_non_linear():
+    mu = [np.array([-5, -5]), np.array([-5, 5]), np.array([5, -5]), np.array([5, 5])]
 
-    print(gnb.loss(X, y))
-    print(misclassification_error(real.predict(X), y))
-    print()
+    x, y = [], []
+    for _m in range(m):
+        y.append(int(np.random.choice([0, 1, 2, 3])))
+        x.append(mu[y[-1]] + np.random.multivariate_normal([0, 0], [[1, 0], [0, 1]]))
+
+    y = np.array(y)
+    return (np.array(x), np.logical_or(y == 1, y == 2).astype(int)), "Four Gaussians Two Classes"

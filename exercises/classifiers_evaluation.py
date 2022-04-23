@@ -3,7 +3,7 @@ import pandas as pd
 from IMLearn.learners.classifiers import Perceptron, LDA, GaussianNaiveBayes
 from typing import Tuple
 
-from IMLearn.metrics import misclassification_error
+from IMLearn.metrics import accuracy
 from utils import *
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -96,32 +96,55 @@ def get_ellipse(mu: np.ndarray, cov: np.ndarray):
     return go.Scatter(x=mu[0] + xs, y=mu[1] + ys, mode="lines", marker=dict(color="black"))
 
 
+def get_marker(mu: np.ndarray):
+    """
+    Draw a marker centered at given location.
+
+    Parameters
+    ----------
+    mu : ndarray of shape (2,)
+        Center of marker
+    """
+    return go.Scatter(x=[mu[0]], y=[mu[1]], mode="markers", marker=dict(color="black",
+                                                                        size=10,
+                                                                        symbol="x"))
+
+
 def compare_gaussian_classifiers():
     """
     Fit both Gaussian Naive Bayes and LDA classifiers on both gaussians1 and gaussians2 datasets
     """
-    for n, f in [("gaussian-1", "../datasets/gaussian1.npy"), ("gaussian-2", "../datasets/gaussian2.npy")]:
-        fig = make_subplots(rows=1, cols=2, subplot_titles=["LDA", "Naive Bayes"])
-        for name, i, classifier in ("LDA", 0, LDA), ("Naive Bayes", 1, GaussianNaiveBayes):
+    for n, f in [("Gaussian-1", "../datasets/gaussian1.npy"), ("Gaussian-2", "../datasets/gaussian2.npy")]:
+        models = [("Naive Bayes", GaussianNaiveBayes), ("LDA", LDA)]
+        model_names = [model[0] for model in models]
+        fig = make_subplots(rows=1, cols=2, subplot_titles=[f"{m}$" for m in model_names],
+                            horizontal_spacing=0.05, vertical_spacing=.03)
+        for i, (name, model) in enumerate(models):
             # Load dataset
+            # Fit models and predict over training set
             dataset = np.load(f)
             X, y = dataset[:, :-1], dataset[:, -1]
-            # Fit models and predict over training set
-            model = classifier()
-            model.fit(X, y)
-            classes = model.predict(X)
-            # Plot a figure with two subplots, showing the Gaussian Naive Bayes
-            # predictions on the left and LDA predictions
-            # on the right. Plot title should specify dataset used and subplot titles
-            # should specify algorithm and accuracy
-            # Create subplots
-            from IMLearn.metrics import accuracy
+            classifier = model()
+            classifier.fit(X, y)
+            classes = classifier.predict(X)
+
             df = pd.DataFrame(np.column_stack((X, y, classes)),
                               columns=["Feature 1", "Feature 2", "class", "prediction"])
-            subfig = go.Scatter(x=df["Feature 1"], y=df["Feature 2"], marker_color=df["prediction"],
-                                marker_symbol=df["class"], mode="markers")
-            fig.add_trace(subfig, row=1, col=i+1)
-            fig.layout.annotations[i].update(text=f"{name}: accuracy {accuracy(y, classes).__round__(2)}")
+
+            fig.add_trace(go.Scatter(x=df["Feature 1"], y=df["Feature 2"], mode="markers", showlegend=False,
+                                     marker=dict(color=df["prediction"], symbol=df["class"],
+                                                 colorscale=custom[0:3],
+                                                 line=dict(color="black", width=1))),
+                          col=(i + 1), row=1)
+            fig.layout.annotations[i].update(text=f"{name}, accuracy: {accuracy(y, classes).__round__(3)}")
+
+            for j, class_ in enumerate(classifier.classes_):
+                if type(classifier) is GaussianNaiveBayes:
+                    fig.add_trace(get_ellipse(classifier.mu_[j, :], np.diag(classifier.vars_[j, :])), col=(i + 1),
+                                  row=1)
+                elif type(classifier) is LDA:
+                    fig.add_trace(get_ellipse(classifier.mu_[j, :], classifier.cov_), col=(i + 1), row=1)
+                fig.add_trace(get_marker(classifier.mu_[j, :]), col=(i + 1), row=1)
 
             # Add traces for data-points setting symbols and colors
             # raise NotImplementedError()
@@ -130,14 +153,13 @@ def compare_gaussian_classifiers():
             # Add ellipses depicting the covariances of the fitted Gaussians
             # raise NotImplementedError()
 
-        fig.update_layout(
-            title_text=f"Classification: Performance of different classifiers on {n} data",
-            xaxis_title="Feature 1",
-            yaxis_title="Feature 2", title_x=0.5,
-            title_font_size=25,
-            height=600,
-            width=1000,
-            showlegend=True)
+        fig.update_layout(title=fr"<b>Classification: Performance of probabilistic classifiers on {n} data<b>",
+                          margin=dict(t=100),
+                          title_x=0.5,
+                          title_font_size=25,
+                          width=1000,
+                          height=600,
+                          showlegend=False)
         fig.show()
 
 
