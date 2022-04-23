@@ -83,6 +83,7 @@ class GaussianNaiveBayes(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
+        # Expression derived in similar way to recitation, only 'cov' matrix is diagonal and differs between classes.
         A = (1 / self.vars_) * self.mu_
         B = np.log(self.pi_) - 0.5 * np.sum(np.square(self.mu_) * (1 / self.vars_), axis=1)
         G = np.log(np.abs(np.prod(self.vars_, axis=1)))

@@ -121,7 +121,7 @@ def compare_gaussian_classifiers():
             subfig = go.Scatter(x=df["Feature 1"], y=df["Feature 2"], marker_color=df["prediction"],
                                 marker_symbol=df["class"], mode="markers")
             fig.add_trace(subfig, row=1, col=i+1)
-            fig.layout.annotations[i].update(text=f"{name}: accuracy {misclassification_error(y, classes).__round__(2)}")
+            fig.layout.annotations[i].update(text=f"{name}: accuracy {accuracy(y, classes).__round__(2)}")
 
             # Add traces for data-points setting symbols and colors
             # raise NotImplementedError()
