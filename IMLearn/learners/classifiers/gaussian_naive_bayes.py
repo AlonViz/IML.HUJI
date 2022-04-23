@@ -1,7 +1,6 @@
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
-from numpy.linalg import slogdet
 
 
 class GaussianNaiveBayes(BaseEstimator):

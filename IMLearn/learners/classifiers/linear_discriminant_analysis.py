@@ -53,7 +53,7 @@ class LDA(BaseEstimator):
         self.mu_ = (A @ X) / nk[:, None]
         self.pi_ = nk / y.size
         X_mu = X - (np.transpose(A) @ self.mu_)  # reduce row mu_yi from X for each row x
-        self.cov_ = (np.transpose(X_mu) @ X_mu) / y.size
+        self.cov_ = (np.transpose(X_mu) @ X_mu) / (y.size - 1) # unbiased estimator of covariance
         self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
