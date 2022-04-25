@@ -46,7 +46,7 @@ class GaussianNaiveBayes(BaseEstimator):
         # A[i][j] == 1 iff classes_[i] == y[j]. A: (n_classes, n_samples)
         self.mu_ = (A @ X) / nk[:, None]
         self.pi_ = nk / y.size
-        self.vars_ = np.stack([np.var(X[y == class_, :], ddof=self.classes_.size, axis=0) for class_ in self.classes_])
+        self.vars_ = np.stack([np.var(X[y == class_, :], ddof=1, axis=0) for class_ in self.classes_])
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
