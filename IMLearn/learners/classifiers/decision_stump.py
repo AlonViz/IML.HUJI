@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import Tuple, NoReturn
+from typing import Tuple, NoReturn, Callable
 from ...base import BaseEstimator
 import numpy as np
+from ...metrics import misclassification_error
 from itertools import product
 
 
@@ -20,6 +21,7 @@ class DecisionStump(BaseEstimator):
     self.sign_: int
         The label to predict for samples where the value of the j'th feature is about the threshold
     """
+
     def __init__(self) -> DecisionStump:
         """
         Instantiate a Decision stump classifier
@@ -39,7 +41,16 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+
+        n_samples = y.size
+        thresholds_errors_ = np.vstack((
+            np.apply_along_axis(lambda values: (1,) + self._find_threshold(values, y, 1), axis=0, arr=X).T,
+            np.apply_along_axis(lambda values: (-1,) + self._find_threshold(values, y, -1), axis=0, arr=X).T))
+        # thresholds_errors is of shape (2*n_samples, 3) and contains triplets (sign, threshold, error).
+
+        index = np.argmin(thresholds_errors_[:, -1])
+        self.sign_, self.threshold_, self.j_, = thresholds_errors_[index, 0], \
+                                                thresholds_errors_[index, 1], index % n_samples
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -63,7 +74,7 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        return np.where(X[:, self.j_] >= self.threshold_, self.sign_, -self.sign_)
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -95,7 +106,11 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        thresh_error: Callable[[float], float] = lambda thresh_: misclassification_error(
+            np.where(values >= thresh_, sign, -sign), labels)
+        errors_ = np.vectorize(thresh_error)(values)
+        threshold_index_ = np.argmin(errors_)
+        return values[threshold_index_], errors_[threshold_index_]
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -114,4 +129,4 @@ class DecisionStump(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        return misclassification_error(self.predict(X), y)
