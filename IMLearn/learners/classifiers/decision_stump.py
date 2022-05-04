@@ -1,10 +1,14 @@
 from __future__ import annotations
 from typing import Tuple, NoReturn, Callable
+
+import pandas as pd
+
 from ...base import BaseEstimator
 import numpy as np
 from ...metrics import misclassification_error
 from itertools import product
 from IMLearn.utils import measure_time
+
 
 class DecisionStump(BaseEstimator):
     """
@@ -72,7 +76,6 @@ class DecisionStump(BaseEstimator):
         """
         return np.where(X[:, self.j_] >= self.threshold_, self.sign_, -self.sign_)
 
-    @measure_time
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
         Given a feature vector and labels, find a threshold by which to perform a split
@@ -103,9 +106,12 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        thresh_error: Callable[[float], float] = lambda thresh_: self._weighted_misclassification_error(
-            np.where(values >= thresh_, sign, -sign), labels)
-        errors_ = np.vectorize(thresh_error)(values)
+        p = values.argsort()
+        values, labels = values[p], labels[p]
+        errors_ = list()
+        errors_.append(self._weighted_misclassification_error(np.full((labels.size,), sign), labels))
+        for i, threshold in enumerate(values[:-1]):
+            errors_.append(errors_[-1] + sign * labels[i])
         threshold_index_ = np.argmin(errors_)
         return values[threshold_index_], errors_[threshold_index_]
 
@@ -144,3 +150,9 @@ class DecisionStump(BaseEstimator):
             The labels to compare against
         """
         return np.abs(labels[np.sign(labels) != np.sign(values)]).sum()
+
+    def sign(self, T: int):
+        """sign function. used instead of np.sign, because it might return 0s.
+        returns 1 if T>=0 and --1 otherwise.
+        """
+        return 1 if T >= 0 else -1
