@@ -108,8 +108,7 @@ class DecisionStump(BaseEstimator):
         """
         p = values.argsort()
         values, labels = values[p], labels[p]
-        errors_ = list()
-        errors_.append(self._weighted_misclassification_error(np.full((labels.size,), sign), labels))
+        errors_ = [self._weighted_misclassification_error(np.full((labels.size,), sign), labels)]
         for i, threshold in enumerate(values[:-1]):
             errors_.append(errors_[-1] + sign * labels[i])
         threshold_index_ = np.argmin(errors_)
