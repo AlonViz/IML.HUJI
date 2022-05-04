@@ -51,15 +51,13 @@ class AdaBoost(BaseEstimator):
         """
         n_samples = y.size
         self.D_ = np.full(n_samples, 1 / n_samples)
-        cur_data = X
         for _ in range(self.iterations_):
             stump = self.wl_()
             self.models_.append(stump)
-            stump.fit(cur_data, y)  # find_best_stump #
-            self.weights_.append(0.5 * np.log((1 / stump.loss(cur_data, y)) - 1))  # find_weight
+            stump.fit(X, y * self.D_)  # find_best_stump #
+            self.weights_.append(0.5 * np.log((1 / stump.loss(X, y * self.D_)) - 1))  # find_weight
             self.D_ = self.D_ * np.exp(-y * self.weights_[-1] * stump.predict(X))  # update dist. and resample
             self.D_ = self.D_ / np.sum(self.D_)
-            cur_data = np.random.choice(X, n_samples, True, self.D_)
 
     def _predict(self, X):
         """
@@ -113,7 +111,7 @@ class AdaBoost(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return np.sum(self.weights_[i] * self.models_[i].predict(X) for i in range(T))
+        return np.where(np.sum(self.weights_[i] * self.models_[i].predict(X) for i in range(T)) >= 0, 1, -1)
 
     def partial_loss(self, X: np.ndarray, y: np.ndarray, T: int) -> float:
         """

@@ -1,6 +1,7 @@
 from typing import Tuple
 import numpy as np
 import pandas as pd
+import time
 
 
 def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .75) \
@@ -61,3 +62,18 @@ def confusion_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
         while value `j` vas found in vector `b`
     """
     raise NotImplementedError()
+
+
+def measure_time(f):
+    """
+    wrapper for a function f that prints the time it ran.
+    :return:
+    """
+    def timed(*args, **kw):
+        ts = time.time()
+        result = f(*args, **kw)
+        te = time.time()
+        print('%r %2.2f sec' % (f.__name__, te - ts))
+        return result
+
+    return timed
