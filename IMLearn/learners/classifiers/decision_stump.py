@@ -1,13 +1,8 @@
 from __future__ import annotations
-from typing import Tuple, NoReturn, Callable
-
-import pandas as pd
-
+from typing import Tuple, NoReturn
 from ...base import BaseEstimator
 import numpy as np
-from ...metrics import misclassification_error
 from itertools import product
-from IMLearn.utils import measure_time
 
 
 class DecisionStump(BaseEstimator):
