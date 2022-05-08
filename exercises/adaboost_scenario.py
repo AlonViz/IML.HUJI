@@ -66,7 +66,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                       yaxis_title="Misclassification Error")
     # fig.write_image("{folder}/{figure_name}.png".format(folder=output_path,
     #                                                    figure_name=f"{noise_no}_graphs"))
-    # fig.show()
+    fig.show()
 
     symbols = np.array(['x', 'square', 'circle'])
     # Question 2: Plotting decision surfaces
@@ -95,7 +95,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                       height=600).update_xaxes(visible=False).update_yaxes(visible=False)
     # fig.write_image("{folder}/{figure_name}.png".format(folder=output_path,
     #                                                     figure_name=f"{noise_no}_boundaries"))
-    # fig.show()
+    fig.show()
 
     # Question 3: Decision surface of best performing ensemble
     best_n_learners = T[np.argmin(losses)]
@@ -117,7 +117,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
         height=600).update_xaxes(visible=False).update_yaxes(visible=False)
     # fig.write_image("{folder}/{figure_name}.png".format(folder=output_path,
     #                                                     figure_name=f"{noise_no}_best"))
-    # fig.show()
+    fig.show()
 
     # Question 4: Decision surface with weighted samples
     fig = go.Figure()
@@ -139,7 +139,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                       height=600).update_xaxes(visible=False).update_yaxes(visible=False)
     # fig.write_image("{folder}/{figure_name}.png".format(folder=output_path,
     #                                                      figure_name=f"{noise_no}_weighted"))
-    # fig.show()
+    fig.show()
 
 
 if __name__ == '__main__':
