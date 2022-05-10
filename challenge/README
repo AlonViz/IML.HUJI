@@ -1,0 +1,51 @@
+folders:
+bin - additional files
+labels - labeled data for each week
+results - our results for each week
+test_data - test data for each week
+utils - any additional preprocessing tools
+
+tests:
+run test_correlation to see correlation of preprocessed data in with results.
+run test_performance to see full performance report on split data or over test set.
+test_models is used to check different learning modules.
+
+
+Week 1 Updates:
+-basic preprocessing to data
+-currency and cancellation_code processing
+-prediction based on "has cancelled in 7 to 45 days from order."
+
+Week 2 Updates:
+-changed prediction criteria. switched to a combination of classification (has cancelled)
+and regression (expected time from order to cancellation). Read more on:
+https://stackoverflow.com/questions/57917374/how-to-combine-binary-classification-and-regression-problems
+
+Week 3:
+-Compare regression & classification models and choose an optimal one.
+our estimator uses 'KNeighborsClassifier' and 'LinearRegression' which were chosen arbitrarily last week.
+choose optimal parameters for models. consider probabilistic claxssifiers? (LDA...)
+-Work on data preprocessing in agoda_cancellation_prediction.py - process_features. this is the primary function that
+does the pre-processing. use tests/test_prediction to test correlation of generated features. Read more on:
+https://www.analyticsvidhya.com/blog/2022/03/end-to-end-hotel-booking-cancellation-machine-learning-model/
+-Add more stuff to do so we climb to the top of the leaderboard... go powerpuff!
+
+Week 4:
+-General guidelines: use split training sample to test. only test on previous weeks before submission to avoid
+test set overfitting.
+
+Week 5:
+-Added several ensemble learning classifiers, need to test them.
+-Alon: I made some experiments on 'class_and_reg' branch, that combine classification and regression models
+to make predictions. it's pretty shit.
+
+TODO:
+-Learn on new modules, ensemble - bagging and the other thing. train over test data, and before submission test on prev. weeks.
+-Improve feature pre-processing. learn the correlations and covariances, improve cancellation-code etc.
+Consider removing some features or changing them.
+-Better way to classify? Check the function "process_labels" in "agoda_cancellation_prediction" to see
+the current label processing. for now, we mark a guest in the training set as 'canceled' if they canceled
+their order on the 7-13th of the following month. this gives ~900 cancels.
+-Something about maximizing F1-score that could be useful:
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4442797/
+https://arxiv.org/ftp/arxiv/papers/1606/1606.08698.pdf

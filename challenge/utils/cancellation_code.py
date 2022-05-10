@@ -35,9 +35,47 @@ def evaluate_cancellation_code(cancellation_code: str, booking_time_before: int,
     return expected_fine
 
 
+def filter(cancellation_code: str, booking_time_before: int, stay_duration: int) -> float:
+    cancellations = process_cancellation_code(cancellation_code)
+    filtered = [i for i in cancellations if i[0] < booking_time_before]
+    prec_only = []
+    for i in filtered:
+        if i[2] is not None:
+            prec_only.append([i[0], i[2]])
+        else:
+            prec_only.append([i[0], i[1] / stay_duration])
+
+
 def no_show(cancellation_code: str) -> int:
     """
     returns 1 if the cancellation code contains a no-show fee, and 0 otherwise
     """
     cancellations = process_cancellation_code(cancellation_code)
     return any(lst for lst in cancellations if lst[0] == 0)
+
+
+def fine_after_x_days(cancellation_code: str, booking_time_before: int, stay_duration: int, days: int):
+    """
+    returns the expected fine in percentages after 'days' days from reservation.
+    """
+    time_before_reservation = booking_time_before - days
+    if time_before_reservation < 0:
+        return 0
+
+    cancellations = process_cancellation_code(cancellation_code)
+
+    # convert cancellation policy to format (Days, Percentage)
+    percentage_cancellations = []
+    for cancel in cancellations:
+        if cancel[1] is None:
+            percentage_cancellations.append((cancel[0], cancel[2]))
+        else:
+            percentage_cancellations.append((cancel[0], cancel[1] / stay_duration))
+
+    if not percentage_cancellations:
+        return 0
+    # return the fine associated with the smallest number of days larger than time_before_reservation
+    fines = [x for x in percentage_cancellations if x[0] > time_before_reservation]
+    if not fines:
+        return 0
+    return min(fines, key=lambda x: x[0])[1]
