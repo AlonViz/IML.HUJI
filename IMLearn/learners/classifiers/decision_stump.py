@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Tuple, NoReturn
 from ...base import BaseEstimator
 import numpy as np
-from itertools import product
 
 
 class DecisionStump(BaseEstimator):
@@ -101,13 +100,14 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
+        n_samples = values.size
         p = values.argsort()
         values, labels = values[p], labels[p]
         errors_ = [self._weighted_misclassification_error(np.full((labels.size,), sign), labels)]
         for i, threshold in enumerate(values[:-1]):
             errors_.append(errors_[-1] + sign * labels[i])
         threshold_index_ = np.argmin(errors_)
-        return values[threshold_index_], errors_[threshold_index_]
+        return values[threshold_index_], errors_[threshold_index_] / n_samples
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -128,7 +128,8 @@ class DecisionStump(BaseEstimator):
         """
         return self._weighted_misclassification_error(self.predict(X), y)
 
-    def _weighted_misclassification_error(self, values: np.ndarray, labels: np.ndarray) -> float:
+    @staticmethod
+    def _weighted_misclassification_error(values: np.ndarray, labels: np.ndarray) -> float:
         """
         Evaluate performance under misclassification loss function
 
@@ -145,7 +146,8 @@ class DecisionStump(BaseEstimator):
         """
         return np.abs(labels[np.sign(labels) != np.sign(values)]).sum()
 
-    def sign(self, T: int):
+    @staticmethod
+    def sign(T: int):
         """sign function. used instead of np.sign, because it might return 0s.
         returns 1 if T>=0 and --1 otherwise.
         """
