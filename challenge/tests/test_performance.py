@@ -46,7 +46,7 @@ def evaluate_over_test(estimator, df, cancellation_labels, week: int = 1):
 
     # Load Test data
     dates_test, df_test = load_test_data(df.columns, f"test_data/test_set_week_{week}.csv")
-    labels = pd.read_csv(f"labels/test_set_week_{week}_labels.csv")
+    labels = pd.read_csv(f"labels/week_{week}_labels.csv")
     labels = labels.applymap(lambda st: int(st.split("|", )[1]))
     return classification_report(estimator.predict(df_test.to_numpy()), labels)
 
