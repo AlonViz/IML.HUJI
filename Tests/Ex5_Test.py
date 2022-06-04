@@ -1,16 +1,17 @@
 import numpy as np
-import pandas as pd
-from IMLearn.model_selection.cross_validate import cross_validate
-from IMLearn.learners.classifiers.perceptron import Perceptron
-from IMLearn.learners.classifiers.decision_stump import DecisionStump
-from IMLearn.learners.classifiers.gaussian_naive_bayes import GaussianNaiveBayes
-from IMLearn.metrics import accuracy, mean_square_error
+from IMLearn.learners.regressors.linear_regression import LinearRegression
+from IMLearn.learners.regressors.ridge_regression import RidgeRegression
 
-df = pd.read_csv("datasets/SAheart.data", header=0, index_col=0)
-df.famhist = df.famhist == "Present"
-X, y = df.loc[:, df.columns != 'chd'].values, df["chd"].values
-y = np.where(y == 0, -1, 1)
-estimator = DecisionStump()
-cv = 4
-cv = cross_validate(estimator, X.astype(int), y.astype(int), accuracy, cv)
-print(cv)
+
+# Generate X,y
+X = np.random.multivariate_normal(mean=[0, 0, 0], cov=np.diag([1, 3, 2]), size=100)
+w = np.array([1, 5, -20])
+b = 0
+y = X @ w + b
+
+# compare performances of Linear and Ridge. for lam=0, should be the same.
+# for lam > 0, ridge regression might have higher loss, but coefs. values should be smaller.
+lr = LinearRegression(include_intercept=True).fit(X, y)
+rr = RidgeRegression(lam=0, include_intercept=True).fit(X, y)
+print(lr.coefs_, rr.coefs_)
+print(lr.loss(X, y), rr.loss(X, y))
