@@ -66,8 +66,7 @@ class RidgeRegression(BaseEstimator):
 		if self.lam_ == 0:
 			self.coefs_ = pinv(X) @ y
 		else:
-			m, d = X.shape
-			lam_id = np.eye(d) * self.lam_
+			lam_id = np.eye(X.shape[1]) * self.lam_
 			lam_id[0, 0] = 0
 			self.coefs_ = inv(X.T @ X + lam_id) @ X.T @ y
 

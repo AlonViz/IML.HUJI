@@ -1,16 +1,12 @@
 from __future__ import annotations
-import numpy as np
-import pandas as pd
 from sklearn.datasets import load_diabetes
+from sklearn.linear_model import Lasso
+from sklearn.model_selection import train_test_split
+from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
 from IMLearn.metrics import mean_square_error
 from IMLearn.model_selection import cross_validate
-from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
-from sklearn.linear_model import Lasso
-from sklearn.linear_model import Ridge as RidgeSKLearn
-from sklearn.model_selection import train_test_split
 from utils import *
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 plot = False
 
@@ -111,7 +107,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
 	X_train, X_test, y_train, y_test = train_test_split(data, target, train_size=n_samples)
 
 	# Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-	learners = [("Lasso", Lasso, 'alpha'), ("Ridge", RidgeRegression, 'lam'), ("RidgeSKLearn", RidgeSKLearn, 'alpha')]
+	learners = [("Lasso", Lasso, 'alpha'), ("Ridge", RidgeRegression, 'lam')]
 	learners_best_params = []
 	reg_values = np.linspace(0.02, 1, n_evaluations)
 	for name, learner, param_name in learners:
@@ -157,7 +153,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
 
 if __name__ == '__main__':
 	np.random.seed(0)
-	# select_polynomial_degree(100, 5)
-	# select_polynomial_degree(100, 0)
-	# select_polynomial_degree(1500, 10)
+	select_polynomial_degree(100, 5)
+	select_polynomial_degree(100, 0)
+	select_polynomial_degree(1500, 10)
 	select_regularization_parameter(50, 500)
