@@ -35,6 +35,7 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
 
     """
     # join X_y to shuffle them simultaneously and then seperate them again
+    y.name = 'labels'
     X_y = X.join(y)
     X_y = X_y.sample(frac=1).reset_index(drop=True)
     X, y = X_y.iloc[:, :-1], X_y.iloc[:, -1:]

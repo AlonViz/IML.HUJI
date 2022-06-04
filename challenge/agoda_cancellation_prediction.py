@@ -2,7 +2,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from powerpuff.utils.cancellation_code import evaluate_cancellation_code, no_show, fine_after_x_days
-from powerpuff.utils.currencies import convert_currency
+from powerpuff.utils.utils import convert_currency
 from IMLearn.base import BaseEstimator
 from powerpuff.agoda_cancellation_estimator import AgodaCancellationEstimator
 import pycountry
