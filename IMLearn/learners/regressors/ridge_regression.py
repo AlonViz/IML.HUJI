@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
-from numpy.linalg import svd, pinv
+from numpy.linalg import svd, pinv, inv
 
 from ...metrics.loss_functions import mean_square_error
 
@@ -63,13 +63,13 @@ class RidgeRegression(BaseEstimator):
 		"""
 		if self.include_intercept_:
 			X = np.insert(X, obj=0, values=1, axis=1)
-		m, d = X.shape
-		u, s, vt = svd(X)
-		s_lam = np.where(s == 0, 0, s + (self.lam_ / s))
-		s_lam[0] = s[0]
-		s_lam_matrix = np.zeros((m, d))
-		s_lam_matrix[:d, :d] = np.diag(s_lam)
-		self.coefs_ = vt.T @ pinv(s_lam_matrix) @ u.T @ y
+		if self.lam_ == 0:
+			self.coefs_ = pinv(X) @ y
+		else:
+			m, d = X.shape
+			lam_id = np.eye(d) * self.lam_
+			lam_id[0, 0] = 0
+			self.coefs_ = inv(X.T @ X + lam_id) @ X.T @ y
 
 	def _predict(self, X: np.ndarray) -> np.ndarray:
 		"""
