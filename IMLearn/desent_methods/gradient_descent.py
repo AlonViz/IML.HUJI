@@ -45,7 +45,7 @@ class GradientDescent:
 				 tol: float = 1e-5,
 				 max_iter: int = 1000,
 				 out_type: str = "last",
-				 callback: Callable[[GradientDescent, ...], None] = default_callback):
+				 callback: Callable = default_callback):
 		"""
 		Instantiate a new instance of the GradientDescent class
 
@@ -139,14 +139,15 @@ class GradientDescent:
 				best = curr_out
 				output = f.weights
 
+			delta = np.linalg.norm(step)
 			self.callback_(self, solver=self,
 						   weights=f.weights,
 						   val=curr_out,
 						   grad=grad,
 						   t=t,
 						   eta=eta,
-						   delta=np.linalg.norm(step))
-			if step < self.tol_:
+						   delta=delta)
+			if delta < self.tol_:
 				break
 
 		# return bast value based on strategy

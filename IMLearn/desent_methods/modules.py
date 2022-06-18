@@ -17,7 +17,7 @@ class L2(BaseModule):
         weights: np.ndarray, default=None
             Initial value of weights
         """
-        super().__init__(weights)
+        super().__init__(np.array(weights))
 
     def compute_output(self, **kwargs) -> np.ndarray:
         """
@@ -62,7 +62,7 @@ class L1(BaseModule):
         weights: np.ndarray, default=None
             Initial value of weights
         """
-        super().__init__(weights)
+        super().__init__(np.array(weights))
 
     def compute_output(self, **kwargs) -> np.ndarray:
         """
