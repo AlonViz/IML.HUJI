@@ -140,19 +140,20 @@ class GradientDescent:
 				output = f.weights
 
 			delta = np.linalg.norm(step)
-			self.callback_(self, solver=self,
+			self.callback_(solver=self,
 						   weights=f.weights,
 						   val=curr_out,
 						   grad=grad,
 						   t=t,
 						   eta=eta,
-						   delta=delta)
+						   delta=delta,
+						   module=f)
 			if delta < self.tol_:
 				break
 
 		# return bast value based on strategy
 		if self.out_type_ == "average":
-			return np.mean(output)
+			return np.mean(output, axis=0)
 		if self.out_type_ == "best":
 			return output
 		if self.out_type_ == "last":

@@ -227,15 +227,20 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 
 
 def fit_logistic_regression():
-	# Load and split SA Heard Disease dataset
+	# Load and split SA Heart Disease dataset
 	X_train, y_train, X_test, y_test = load_data()
+	X_train, y_train, X_test, y_test = X_train.to_numpy(), y_train.to_numpy().reshape(
+		-1), X_test.to_numpy(), y_test.to_numpy().reshape(-1)
+	LR = LogisticRegression(include_intercept=False)
+	LR.fit(X_train, y_train)
+	print(LR.loss(X_train, y_train), LR.loss(X_test, y_test))
 
 	# Plotting convergence rate of logistic regression over SA heart disease data
-	raise NotImplementedError()
+	# raise NotImplementedError()
 
 	# Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
 	# of regularization parameter
-	raise NotImplementedError()
+	# raise NotImplementedError()
 
 
 if __name__ == '__main__':

@@ -135,7 +135,8 @@ class LogisticModule(BaseModule):
 		"""
 		pred = X @ self.weights
 		m = y.size
-		return (-1 / m) * np.sum(y * pred - np.log(1 + np.exp(pred)))
+		output = (-1 / m) * np.sum(y * pred - np.log(1 + np.exp(pred)))
+		return output
 
 	def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
 		"""
@@ -155,7 +156,9 @@ class LogisticModule(BaseModule):
 			Derivative of function with respect to self.weights at point self.weights
 		"""
 		m = y.size
-		return (-1 / m) * ((y @ X) - (1 - (1 / (X @ self.weights))) @ X)
+		exw = np.exp(X @ self.weights)
+		output = (-1 / m) * ((y @ X) - (exw / (1 + exw)) @ X)
+		return output
 
 
 class RegularizedModule(BaseModule):
@@ -235,10 +238,10 @@ class RegularizedModule(BaseModule):
 			Derivative with respect to self.weights at point self.weights
 		"""
 		if self.include_intercept_:
-			regularization_jacobian = self.regularization_module_.compute_jacobian(**kwargs)
-		else:
 			regularization_jacobian = np.concatenate(
 				(np.zeros(1), self.regularization_module_.compute_jacobian(**kwargs)))
+		else:
+			regularization_jacobian = self.regularization_module_.compute_jacobian(**kwargs)
 		if self.include_intercept_:
 			kwargs["X"] = np.insert(kwargs["X"], obj=0, values=1, axis=1)
 		fidelity_jacobian = self.fidelity_module_.compute_jacobian(**kwargs)
