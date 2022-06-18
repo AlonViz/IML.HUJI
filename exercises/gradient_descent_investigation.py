@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 import pandas as pd
 from typing import Tuple, List, Callable, Type
@@ -9,6 +11,10 @@ from IMLearn.learners.classifiers.logistic_regression import LogisticRegression
 from IMLearn.utils import split_train_test
 
 import plotly.graph_objects as go
+
+show = False
+save = False
+graph_folder = "C:\\Alon\\Studies\\IML\\Exercise 6\\Graphs"
 
 
 def plot_descent_path(module: Type[BaseModule],
@@ -77,17 +83,62 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
 	"""
 	values, weights = list(), list()
 
-	def inner_function(GD: GradientDescent, **kwargs):
+	def inner_callback(GD: GradientDescent, **kwargs):
 		values.append(kwargs["val"])
 		weights.append(kwargs["weights"])
 		return
 
-	return inner_function, values, weights
+	return inner_callback, values, weights
 
 
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
 								 etas: Tuple[float] = (1, .1, .01, .001)):
-	raise NotImplementedError()
+	for module_class in (L1, L2):
+		convergence_rates = list()
+		losses = list()
+		for lr in etas:
+			# minimize for module, lr, initial weights:
+			module = module_class(weights=init)
+			callback, values, weights = get_gd_state_recorder_callback()
+			gd = GradientDescent(learning_rate=FixedLR(lr), callback=callback)
+			best_weights = gd.fit(module, np.empty(0), np.empty(0))
+
+			# Plot descent path
+			title = r"$\text{{Descent path of {0} norm, with fixed learning rate = {1}}}$".format(module_class.__name__,
+																								  lr)
+			fig = plot_descent_path(module=module_class, title=title, descent_path=np.array(weights))
+			fig.update_layout(width=800,
+							  height=500,
+							  title_font_size=20,
+							  title_x=0.5)
+			if lr == .01:
+				if save:
+					fig.write_image(
+						"{folder}/{module}_descent_path.png".format(folder=graph_folder, module=module_class.__name__))
+			if show:
+				fig.show()
+			convergence_rates.append((lr, values))
+			losses.append((lr,values[-1]))
+
+		# Plot convergence rate
+		fig2 = go.Figure([go.Scatter(x=np.arange(stop=len(values)), y=values,
+									 mode="lines",
+									 name=lr) for lr, values in convergence_rates])
+		fig2.update_layout(title=f"Convergence rate of {module_class.__name__} norm for different learning rates",
+						   width=800,
+						   height=500,
+						   title_font_size=20,
+						   title_x=0.5,
+						   legend_title="Learning Rate",
+						   xaxis_title="num. iteration",
+						   yaxis_title="norm value")
+		if show:
+			fig2.show()
+		if save:
+			fig2.write_image(
+				"{folder}/{module}_convergence_rate.png".format(folder=graph_folder, module=module_class.__name__))
+
+		print(module_class.__name__, losses)
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
