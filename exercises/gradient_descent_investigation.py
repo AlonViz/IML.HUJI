@@ -15,7 +15,7 @@ from IMLearn.metrics.loss_functions import misclassification_error
 import plotly.graph_objects as go
 
 show = False
-save = True
+save = False
 graph_folder = "C:\\Alon\\Studies\\IML\\Exercise 6\\Graphs"
 
 
@@ -255,7 +255,7 @@ def fit_logistic_regression():
 	fpr, tpr, thresholds = roc_curve(y_train, y_pred_proba)
 
 	fig = go.Figure([go.Scatter(x=fpr, y=tpr,
-								mode="lines+markers")])
+								mode="lines")])
 	fig.update_layout(title=r"$\text{ROC curve of logistic regression on heart disease dataset}$",
 					  width=800,
 					  height=500,
