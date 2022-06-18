@@ -98,6 +98,7 @@ class LogisticRegression(BaseEstimator):
 		"""
 		shape = X.shape[1] + 1 if self.include_intercept_ else X.shape[1]
 		self.module_.weights = np.random.multivariate_normal(np.ones(shape), np.eye(shape))
+		self.module_.weights = self.module_.weights / np.sqrt(shape)
 		self.coefs_ = self.solver_.fit(self.module_, X, y)
 
 	def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -114,7 +115,7 @@ class LogisticRegression(BaseEstimator):
 		responses : ndarray of shape (n_samples, )
 			Predicted responses of given samples
 		"""
-		return np.where(self.predict_proba(X) < self.alpha_, 0, 1)
+		return np.where(self.predict_proba(X) >= self.alpha_, 1, 0)
 
 	def predict_proba(self, X: np.ndarray) -> np.ndarray:
 		"""

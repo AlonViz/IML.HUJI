@@ -157,7 +157,9 @@ class LogisticModule(BaseModule):
 		"""
 		m = y.size
 		exw = np.exp(X @ self.weights)
-		output = (-1 / m) * ((y @ X) - (exw / (1 + exw)) @ X)
+		coef = exw / (1 + exw)
+		coef = np.where(np.isnan(coef), 1., coef)
+		output = (-1 / m) * ((y @ X) - coef @ X)
 		return output
 
 

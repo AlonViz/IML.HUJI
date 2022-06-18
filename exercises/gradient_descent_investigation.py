@@ -1,18 +1,21 @@
-import itertools
 import numpy as np
 import pandas as pd
 from typing import Tuple, List, Callable, Type
+from tqdm import tqdm
 
 from IMLearn import BaseModule
 from IMLearn.desent_methods import GradientDescent, FixedLR, ExponentialLR
 from IMLearn.desent_methods.modules import L1, L2
 from IMLearn.learners.classifiers.logistic_regression import LogisticRegression
 from IMLearn.utils import split_train_test
+from sklearn.metrics import roc_curve
+from IMLearn.model_selection.cross_validate import cross_validate
+from IMLearn.metrics.loss_functions import misclassification_error
 
 import plotly.graph_objects as go
 
 show = False
-save = False
+save = True
 graph_folder = "C:\\Alon\\Studies\\IML\\Exercise 6\\Graphs"
 
 
@@ -82,7 +85,7 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
 	"""
 	values, weights = list(), list()
 
-	def inner_callback(GD: GradientDescent, **kwargs):
+	def inner_callback(**kwargs):
 		values.append(kwargs["val"])
 		weights.append(kwargs["weights"])
 		return
@@ -226,25 +229,74 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 	return split_train_test(df.drop(['chd', 'row.names'], axis=1), df.chd, train_portion)
 
 
+def plot_cv(values, train_errors, validation_errors):
+	fig = go.Figure()
+	fig.add_traces([go.Scatter(x=values, y=train_errors, mode="lines+markers",
+							   line=dict(color="blue", width=2), name='Training Error'),
+					go.Scatter(x=values, y=validation_errors, mode="lines+markers",
+							   line=dict(color="red", width=2), name='Validation Error')])
+	fig.update_layout(
+		title_x=0.5,
+		title_font_size=20,
+		width=800,
+		height=600)
+	return fig
+
+
 def fit_logistic_regression():
 	# Load and split SA Heart Disease dataset
 	X_train, y_train, X_test, y_test = load_data()
 	X_train, y_train, X_test, y_test = X_train.to_numpy(), y_train.to_numpy().reshape(
 		-1), X_test.to_numpy(), y_test.to_numpy().reshape(-1)
-	LR = LogisticRegression(include_intercept=False)
-	LR.fit(X_train, y_train)
-	print(LR.loss(X_train, y_train), LR.loss(X_test, y_test))
 
-	# Plotting convergence rate of logistic regression over SA heart disease data
-	# raise NotImplementedError()
+	LR = LogisticRegression(solver=GradientDescent(max_iter=1000))
+	LR.fit(X_train, y_train)
+	y_pred_proba = LR.predict_proba(X_train)
+	fpr, tpr, thresholds = roc_curve(y_train, y_pred_proba)
+
+	fig = go.Figure([go.Scatter(x=fpr, y=tpr,
+								mode="lines+markers")])
+	fig.update_layout(title=r"$\text{ROC curve of logistic regression on heart disease dataset}$",
+					  width=800,
+					  height=500,
+					  title_font_size=20,
+					  title_x=0.5,
+					  xaxis_title="FPR",
+					  yaxis_title="TPR")
+	if show:
+		fig.show()
+	if save:
+		fig.write_image("{folder}/roc_curve.png".format(folder=graph_folder))
+
+	best_alpha = thresholds[np.argmax(tpr - fpr)]
+	LR.alpha_ = best_alpha
+	best_alpha_loss = LR.loss(X_test, y_test)
+	print("best alpha is {:.5f}, which achieved loss of {:.5f} on test set".format(best_alpha, best_alpha_loss))
 
 	# Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
-	# of regularization parameter
-	# raise NotImplementedError()
+	for penalty in ("l1", "l2"):
+		LR_REG = LogisticRegression(penalty=penalty, solver=GradientDescent(max_iter=20000))
+		lamdas = np.array([0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1])
+		errors = []
+		for lamda in tqdm(lamdas):
+			LR_REG.lam_ = lamda
+			train_error, validation_error = cross_validate(LR_REG, X_train, y_train, misclassification_error)
+			errors.append((lamda, train_error, validation_error))
+		errors = np.array(errors)
+		if show:
+			fig = plot_cv(errors[:, 0], errors[:, 1], errors[:, 2])
+			fig.show()
+		best_lambda = errors[np.argmin(errors[:, 2]), 0]
+
+		LR_REG.lam_ = best_lambda
+		LR_REG.fit(X_train, y_train)
+		test_loss = LR_REG.loss(X_test, y_test)
+		print(f"best lambda that was fitted for penalty {penalty} is {best_lambda},"
+			  f" with {test_loss} miss. error on test set.")
 
 
 if __name__ == '__main__':
 	np.random.seed(0)
-	# compare_fixed_learning_rates()
-	# compare_exponential_decay_rates()
+	compare_fixed_learning_rates()
+	compare_exponential_decay_rates()
 	fit_logistic_regression()
