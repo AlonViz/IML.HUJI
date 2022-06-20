@@ -135,7 +135,7 @@ class LogisticModule(BaseModule):
 		"""
 		pred = X @ self.weights
 		m = y.size
-		output = (-1 / m) * np.sum(y * pred - np.log(1 + np.exp(pred)))
+		output = np.sum(y * pred - np.log(1 + np.exp(pred))) / (-m)
 		return output
 
 	def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
@@ -157,9 +157,7 @@ class LogisticModule(BaseModule):
 		"""
 		m = y.size
 		exw = np.exp(X @ self.weights)
-		coef = exw / (1 + exw)
-		coef = np.where(np.isnan(coef), 1., coef)
-		output = (-1 / m) * ((y @ X) - coef @ X)
+		output = ((y - (exw / (1 + exw))) @ X) / (-m)
 		return output
 
 

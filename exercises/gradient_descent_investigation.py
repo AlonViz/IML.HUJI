@@ -249,7 +249,7 @@ def fit_logistic_regression():
 	X_train, y_train, X_test, y_test = X_train.to_numpy(), y_train.to_numpy().reshape(
 		-1), X_test.to_numpy(), y_test.to_numpy().reshape(-1)
 
-	LR = LogisticRegression(solver=GradientDescent(max_iter=1000))
+	LR = LogisticRegression(solver=GradientDescent(max_iter=20000, learning_rate=FixedLR(1e-4)))
 	LR.fit(X_train, y_train)
 	y_pred_proba = LR.predict_proba(X_train)
 	fpr, tpr, thresholds = roc_curve(y_train, y_pred_proba)
@@ -275,7 +275,7 @@ def fit_logistic_regression():
 
 	# Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
 	for penalty in ("l1", "l2"):
-		LR_REG = LogisticRegression(penalty=penalty, solver=GradientDescent(max_iter=20000))
+		LR_REG = LogisticRegression(penalty=penalty, solver=GradientDescent(max_iter=1000))
 		lamdas = np.array([0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1])
 		errors = []
 		for lamda in tqdm(lamdas):
@@ -297,6 +297,6 @@ def fit_logistic_regression():
 
 if __name__ == '__main__':
 	np.random.seed(0)
-	compare_fixed_learning_rates()
-	compare_exponential_decay_rates()
+	# compare_fixed_learning_rates()
+	# compare_exponential_decay_rates()
 	fit_logistic_regression()
